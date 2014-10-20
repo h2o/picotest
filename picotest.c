@@ -25,54 +25,77 @@
 #include <string.h>
 #include "picotest.h"
 
-#define _STR(...) #__VA_ARGS__
-#define STR(...) _STR(__VA_ARGS__)
+struct test_t {
+    int num_tests;
+    int failed;
+};
+struct test_t main_tests, *cur_tests = &main_tests;
+static int test_level = 0;
 
-static int numtests_in_subtest, subtest_success;
-static int all_success = 1;
+static void indent(void)
+{
+    int i;
+    for (i = 0; i != test_level; ++i)
+        printf("    ");
+}
 
 __attribute__((format (printf, 1, 2)))
 void note(const char *fmt, ...)
 {
-    char *escaped_fmt = alloca(strlen(fmt) + sizeof("    # \n"));
     va_list arg;
 
-    strcpy(escaped_fmt, "    # ");
-    strcat(escaped_fmt, fmt);
-    strcat(escaped_fmt, "\n");
+    indent();
+    printf("# ");
 
     va_start(arg, fmt);
-    vprintf(escaped_fmt, arg);
+    vprintf(fmt, arg);
     va_end(arg);
+
+    printf("\n");
 }
 
-void _ok(int cond, const char *file, int line)
+__attribute__((format (printf, 2, 3)))
+void _ok(int cond, const char *fmt, ...)
 {
-    if (! cond) {
-        subtest_success = 0;
-        all_success = 0;
-    }
-    printf("    %s %d - %s %d\n", cond ? "ok" : "not ok", ++numtests_in_subtest, file, line);
+    va_list arg;
+
+    if (! cond)
+        cur_tests->failed = 1;
+    indent();
+
+    printf("%s %d - ", cond ? "ok" : "not ok", ++cur_tests->num_tests);
+    va_start(arg, fmt);
+    vprintf(fmt, arg);
+    va_end(arg);
+
+    printf("\n");
 }
 
-int main(int argc, char **argv)
+int done_testing(void)
 {
-    picotest_cb_t **test, *tests[] = { PICOTEST_FUNCS, NULL };
-    const char *test_name = STR(PICOTEST_FUNCS);
-    int cnt = 0;
+    indent();
+    printf("1..%d\n", cur_tests->num_tests);
+    return cur_tests->failed;
+}
 
-    for (test = tests; *test != NULL; ++test, test_name = strchr(test_name, ',')) {
-        const char *colon_in_test_name = strchr(test_name, ',');
-        int test_name_len = (int)(colon_in_test_name != NULL ? colon_in_test_name - test_name : strlen(test_name));
-        numtests_in_subtest = 0;
-        subtest_success = 1;
-        printf("    # Subtest: %.*s\n", test_name_len, test_name);
-        (**test)();
-        printf("    1..%d\n", numtests_in_subtest);
-        printf("%s %d - %.*s\n", subtest_success ? "ok" : "not ok", ++cnt, test_name_len, test_name);
-    }
+void subtest(const char *name, void (*cb)(void))
+{
+    struct test_t test = {}, *parent_tests;
 
-    printf("1..%d\n", cnt);
+    parent_tests = cur_tests;
+    cur_tests = &test;
+    ++test_level;
 
-    return all_success ? 0 : 1;
+    note("Subtest: %s", name);
+
+    cb();
+
+    done_testing();
+
+    --test_level;
+    cur_tests = parent_tests;
+    if (test.failed)
+        cur_tests->failed = 1;
+    indent();
+    _ok(! test.failed, "%s", name);
 }
