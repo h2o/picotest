@@ -95,6 +95,5 @@ void subtest(const char *name, void (*cb)(void))
     cur_tests = parent_tests;
     if (test.failed)
         cur_tests->failed = 1;
-    indent();
     _ok(! test.failed, "%s", name);
 }
