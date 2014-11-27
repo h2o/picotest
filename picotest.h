@@ -22,10 +22,18 @@
 #ifndef picotest_h
 #define picotest_h
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void note(const char *fmt, ...)  __attribute__((format (printf, 1, 2)));
 void _ok(int cond, const char *fmt, ...) __attribute__((format (printf, 2, 3)));
 #define ok(cond) _ok(cond, "%s %d", __FILE__, __LINE__)
 int done_testing(void);
 void subtest(const char *name, void (*cb)(void));
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
