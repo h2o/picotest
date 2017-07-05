@@ -19,6 +19,9 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
+#ifdef WIN32
+#include "wincompat.h"
+#endif
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
@@ -79,7 +82,7 @@ int done_testing(void)
 
 void subtest(const char *name, void (*cb)(void))
 {
-    struct test_t test = {}, *parent_tests;
+    struct test_t test = {0}, *parent_tests;
 
     parent_tests = cur_tests;
     cur_tests = &test;
