@@ -54,6 +54,7 @@ void note(const char *fmt, ...)
     va_end(arg);
 
     printf("\n");
+    fflush(stdout);
 }
 
 __attribute__((format (printf, 2, 3)))
@@ -71,12 +72,14 @@ void _ok(int cond, const char *fmt, ...)
     va_end(arg);
 
     printf("\n");
+    fflush(stdout);
 }
 
 int done_testing(void)
 {
     indent();
     printf("1..%d\n", cur_tests->num_tests);
+    fflush(stdout);
     return cur_tests->failed;
 }
 
