@@ -41,7 +41,7 @@ static void indent(void)
         printf("    ");
 }
 
-__attribute__((format (printf, 1, 2)))
+PICOTEST_PRINTF_ATTRIBUTE(1, 2)
 void note(const char *fmt, ...)
 {
     va_list arg;
@@ -57,7 +57,7 @@ void note(const char *fmt, ...)
     fflush(stdout);
 }
 
-__attribute__((format (printf, 2, 3)))
+PICOTEST_PRINTF_ATTRIBUTE(2, 3)
 void _ok(int cond, const char *fmt, ...)
 {
     va_list arg;

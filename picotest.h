@@ -26,8 +26,14 @@
 extern "C" {
 #endif
 
-void note(const char *fmt, ...)  __attribute__((format (printf, 1, 2)));
-void _ok(int cond, const char *fmt, ...) __attribute__((format (printf, 2, 3)));
+#if defined(__GNUC__) /* GCC and clang support format attribute */
+#define PICOTEST_PRINTF_ATTRIBUTE(a,b) __attribute__((format (printf, a, b)))
+#else
+#define PICOTEST_PRINTF_ATTRIBUTE(a,b)
+#endif
+
+void note(const char *fmt, ...)  PICOTEST_PRINTF_ATTRIBUTE(1, 2);
+void _ok(int cond, const char *fmt, ...) PICOTEST_PRINTF_ATTRIBUTE(2, 3);
 #define ok(cond) _ok(cond, "%s %d", __FILE__, __LINE__)
 int done_testing(void);
 void subtest(const char *name, void (*cb)(void));
