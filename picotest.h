@@ -26,6 +26,8 @@
 extern "C" {
 #endif
 
+extern int test_index[32];
+
 void note(const char *fmt, ...)  __attribute__((format (printf, 1, 2)));
 void _ok(int cond, const char *fmt, ...) __attribute__((format (printf, 2, 3)));
 #define ok(cond) _ok(cond, "%s %d", __FILE__, __LINE__)
