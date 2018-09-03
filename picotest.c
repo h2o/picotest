@@ -19,6 +19,9 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
+#ifdef _WINDOWS
+#include "wincompat.h"
+#endif
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
@@ -48,6 +51,7 @@ void note(const char *fmt, ...)
     va_end(arg);
 
     printf("\n");
+    fflush(stdout);
 }
 
 __attribute__((format (printf, 2, 3)))
@@ -65,12 +69,14 @@ void _ok(int cond, const char *fmt, ...)
     va_end(arg);
 
     printf("\n");
+    fflush(stdout);
 }
 
 int done_testing(void)
 {
     indent();
     printf("1..%d\n", test_index[test_level]);
+    fflush(stdout);
     return test_fail[test_level];
 }
 
