@@ -27,11 +27,8 @@
 #include <string.h>
 #include "picotest.h"
 
-struct test_t {
-    int num_tests;
-    int failed;
-};
-struct test_t main_tests, *cur_tests = &main_tests;
+int test_index[32] = {1};
+static int test_fail[32];
 static int test_level = 0;
 
 static void indent(void)
@@ -63,10 +60,10 @@ void _ok(int cond, const char *fmt, ...)
     va_list arg;
 
     if (! cond)
-        cur_tests->failed = 1;
+        test_fail[test_level] = 1;
     indent();
 
-    printf("%s %d - ", cond ? "ok" : "not ok", ++cur_tests->num_tests);
+    printf("%s %d - ", cond ? "ok" : "not ok", test_index[test_level]++);
     va_start(arg, fmt);
     vprintf(fmt, arg);
     va_end(arg);
@@ -78,18 +75,17 @@ void _ok(int cond, const char *fmt, ...)
 int done_testing(void)
 {
     indent();
-    printf("1..%d\n", cur_tests->num_tests);
+    printf("1..%d\n", test_index[test_level] - 1);
     fflush(stdout);
-    return cur_tests->failed;
+    return test_fail[test_level];
 }
 
 void subtest(const char *name, void (*cb)(void))
 {
-    struct test_t test = {0}, *parent_tests;
-
-    parent_tests = cur_tests;
-    cur_tests = &test;
     ++test_level;
+
+    test_index[test_level] = 1;
+    test_fail[test_level] = 0;
 
     note("Subtest: %s", name);
 
@@ -98,8 +94,20 @@ void subtest(const char *name, void (*cb)(void))
     done_testing();
 
     --test_level;
-    cur_tests = parent_tests;
-    if (test.failed)
-        cur_tests->failed = 1;
-    _ok(! test.failed, "%s", name);
+    _ok(! test_fail[test_level + 1], "%s", name);
+    test_index[test_level + 1] = 0;
+    test_fail[test_level + 1] = 0;
+}
+
+int test_is_at(int index, ...)
+{
+    va_list arg;
+    va_start(arg, index);
+    size_t level;
+
+    for (level = 0; index == test_index[level] && index != 0; ++level)
+        index = va_arg(arg, int);
+
+    va_end(arg);
+    return index == 0;
 }

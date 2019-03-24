@@ -26,11 +26,18 @@
 extern "C" {
 #endif
 
+extern int test_index[32];
+
 void note(const char *fmt, ...)  __attribute__((format (printf, 1, 2)));
 void _ok(int cond, const char *fmt, ...) __attribute__((format (printf, 2, 3)));
 #define ok(cond) _ok(cond, "%s %d", __FILE__, __LINE__)
 int done_testing(void);
 void subtest(const char *name, void (*cb)(void));
+/**
+ * Returns if the test is at the expected position.  For example, `test_is_at(3, 2, 0)` returns true if it is running the 3rd test at
+ * the top level, which is a subtest in which the next test to be run is the second one.  The last `0` is the terminator.
+ */
+int test_is_at(int index, ...);
 
 #ifdef __cplusplus
 }
