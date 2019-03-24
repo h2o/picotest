@@ -98,3 +98,16 @@ void subtest(const char *name, void (*cb)(void))
     test_index[test_level + 1] = 0;
     test_fail[test_level + 1] = 0;
 }
+
+int test_is_at(int index, ...)
+{
+    va_list arg;
+    va_start(arg, index);
+    size_t level;
+
+    for (level = 0; index == test_index[level] && index != 0; ++level)
+        index = va_arg(arg, int);
+
+    va_end(arg);
+    return index == 0;
+}
