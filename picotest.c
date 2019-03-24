@@ -109,5 +109,5 @@ int test_is_at(int index, ...)
         index = va_arg(arg, int);
 
     va_end(arg);
-    return index == 0;
+    return index == test_index[level] && index == 0;
 }
