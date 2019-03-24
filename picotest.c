@@ -27,7 +27,7 @@
 #include <string.h>
 #include "picotest.h"
 
-int test_index[32];
+int test_index[32] = {1};
 static int test_fail[32];
 static int test_level = 0;
 
@@ -63,7 +63,7 @@ void _ok(int cond, const char *fmt, ...)
         test_fail[test_level] = 1;
     indent();
 
-    printf("%s %d - ", cond ? "ok" : "not ok", ++test_index[test_level]);
+    printf("%s %d - ", cond ? "ok" : "not ok", test_index[test_level]++);
     va_start(arg, fmt);
     vprintf(fmt, arg);
     va_end(arg);
@@ -75,7 +75,7 @@ void _ok(int cond, const char *fmt, ...)
 int done_testing(void)
 {
     indent();
-    printf("1..%d\n", test_index[test_level]);
+    printf("1..%d\n", test_index[test_level] - 1);
     fflush(stdout);
     return test_fail[test_level];
 }
@@ -84,7 +84,7 @@ void subtest(const char *name, void (*cb)(void))
 {
     ++test_level;
 
-    test_index[test_level] = 0;
+    test_index[test_level] = 1;
     test_fail[test_level] = 0;
 
     note("Subtest: %s", name);
@@ -95,4 +95,6 @@ void subtest(const char *name, void (*cb)(void))
 
     --test_level;
     _ok(! test_fail[test_level + 1], "%s", name);
+    test_index[test_level + 1] = 0;
+    test_fail[test_level + 1] = 0;
 }
