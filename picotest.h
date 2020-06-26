@@ -26,6 +26,12 @@
 extern "C" {
 #endif
 
+#ifdef _MSC_VER
+#ifndef __attribute__
+#define __attribute__(X)
+#endif
+#endif
+
 extern int test_index[32];
 
 void note(const char *fmt, ...)  __attribute__((format (printf, 1, 2)));
